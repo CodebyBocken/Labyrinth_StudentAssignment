@@ -6,8 +6,8 @@ public class DirectedEdge
     private int w;
     private double weight;
 
-    public int From(int v) { return v; }
-    public int To (int w) { return w; }
+    public int From() { return v; }
+    public int To () { return w; }
     public double getWeight(){ return weight; }
 
     public DirectedEdge(int v, int w, double weight)

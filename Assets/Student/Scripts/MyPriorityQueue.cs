@@ -6,6 +6,7 @@ public class MyPriorityQueue<T> where T : IComparable<T>
     private readonly List<T> minHeap;
     public int Count { get { return minHeap.Count; } }
     public bool IsEmpty {  get { return minHeap.Count == 0; } }
+    public bool Contains(T v) { return minHeap.Contains(v); }
 
     public void Enqueue(T item)
     {
