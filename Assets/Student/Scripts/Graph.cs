@@ -5,13 +5,15 @@ using UnityEngine;
 
 public class Graph
 {
-    private Grid mapGrid;
-    private MapDataAdapter mapData;
 
     private int v;
     private int e;
 
+    public int V() { return v; }
+    public int E() { return e; }
+
     private List<int>[] adj;
+    public IEnumerable<int> adjacent(int v) { return adj[v]; }
 
     public Graph(int V)
     {
@@ -23,29 +25,21 @@ public class Graph
 
     public void AddEdge(int v, int w)
     {
-
-
         adj[v].Add(w);
         adj[w].Add(v);
         e++;
     }
 
-    public List<int> adjacemt(int v)
+    public void AddDirectedEdge(int v, int w)
     {
-        return adj[v];
+        adj[v].Add(w);
+        e++;
     }
 
-    public int V()
+    public void AddWeightEdge(int v, int w, float weight)
     {
-        // Return number of vertices
-
-        return v;
-    }
-
-    public int E()
-    {
-        // Return number of edges
-
-        return e;
+        adj[v].Add(w);
+        adj[w].Add(v);
+        e++;
     }
 }
