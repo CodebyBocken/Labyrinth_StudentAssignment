@@ -11,7 +11,7 @@ public class EdgeWeightedDigraph
     private List<DirectedEdge>[] adj;
     public IEnumerable<DirectedEdge> adjacent(int v) { return adj[v]; }
 
-    public EdgeWeightedDigraph(int V)
+    public EdgeWeightedDigraph(int V, MapData mapData)
     {
         v = V;
         adj = new List<DirectedEdge>[v];
