@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEditor.XR;
 using UnityEngine;
 using UnityEngine.UIElements;
 public class EdgeWeightedDigraph
@@ -7,8 +8,6 @@ public class EdgeWeightedDigraph
     private int e;
     private int height;
     private int width;
-
-    private Vector2Int[] directions;
 
     public int V() { return v; }
     public int E() { return e; }
@@ -21,8 +20,6 @@ public class EdgeWeightedDigraph
         v = V;
         height = mapData.Height;
         width = mapData.Width;
-
-        directions = new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
 
         adj = new List<DirectedEdge>[v];
         for (int i = 0; i < v; i++)
@@ -44,40 +41,69 @@ public class EdgeWeightedDigraph
         {
             for (int x = 0; x < mapData.Width; x++)
             {
+                Vector2Int current = new Vector2Int(x, y);
                 int from = ConvertToIndex(x, y);
 
                 // Walls
 
-                if (y + 1 < mapData.Height && !mapData.HasHorizontalWall(x, y)) // UP
+                if (y + 1 < mapData.Height) // UP
                 {
-                    int up = ConvertToIndex(x, y + 1);
+                    Vector2Int upNeighbor = new Vector2Int(x, y + 1);
 
-                    float cost = mapData.GetHorizontalWallCost(x, y);
-                    AddDirectedEdge(new DirectedEdge(from, up, cost));
+                    if (!PathfindingAlgorithm.IsMovementBlocked(current, upNeighbor, mapData))
+                    {
+                        float cost = mapData.GetHorizontalWallCost(x, upNeighbor.y);
+                        
+                        int to = ConvertToIndex(upNeighbor.x, upNeighbor.y);
+                        DirectedEdge edge = new DirectedEdge(from, to, cost);
+                        AddDirectedEdge(edge);
+                    
+                    }
                 }
 
-                if (y - 1 >= 0 && !mapData.HasHorizontalWall(x, y)) // DOWN
+                if (y - 1 >= 0) // DOWN
                 {
-                    int down = ConvertToIndex(x, y - 1);
+                    Vector2Int downNeighbor = new Vector2Int(x, y - 1);
 
-                    float cost = mapData.GetHorizontalWallCost(x, y);
-                    AddDirectedEdge(new DirectedEdge(from, down, cost));
+                    if (!PathfindingAlgorithm.IsMovementBlocked(current, downNeighbor, mapData))
+                    {
+                        float cost = mapData.GetHorizontalWallCost(x, y);
+                        
+                        int to = ConvertToIndex(downNeighbor.x, downNeighbor.y);
+                        DirectedEdge edge = new DirectedEdge(from, to, cost);
+                        AddDirectedEdge(edge);
+                        
+                    }
                 }
 
-                if (x + 1 >= 0 && !mapData.HasVerticalWall(x, y)) // RIGHT
+                if (x + 1 < mapData.Width) // RIGHT
                 {
-                    int right = ConvertToIndex(x + 1, y);
+                    Vector2Int rightNeighbor = new Vector2Int(x + 1, y);
 
-                    float cost = mapData.GetVerticalWallCost(x, y);
-                    AddDirectedEdge(new DirectedEdge(from, right, cost));
+                    if (!PathfindingAlgorithm.IsMovementBlocked(current, rightNeighbor, mapData))
+                    {
+                        float cost = mapData.GetVerticalWallCost(rightNeighbor.x, y);
+                        
+                        int to = ConvertToIndex(rightNeighbor.x, rightNeighbor.y);
+                        DirectedEdge edge = new DirectedEdge(from, to, cost);
+                        AddDirectedEdge(edge);
+                        
+                    }
                 }
 
-                if (x - 1 < mapData.Width && !mapData.HasVerticalWall(x, y)) // LEFT
+                if (x - 1 >= 0) // LEFT
                 {
-                    int left = ConvertToIndex(x - 1, y);
+                    Vector2Int leftNeighbor = new Vector2Int(x - 1, y);
 
-                    float cost = mapData.GetVerticalWallCost(x, y);
-                    AddDirectedEdge(new DirectedEdge(from, ConvertToIndex(x - 1, y), cost));
+                    if (!PathfindingAlgorithm.IsMovementBlocked(current, leftNeighbor, mapData))
+                    {
+                        float cost = mapData.GetVerticalWallCost(x, y);
+                        
+                        int to = ConvertToIndex(leftNeighbor.x, leftNeighbor.y);
+                        DirectedEdge edge = new DirectedEdge(from, to, cost);
+                        AddDirectedEdge(edge);
+
+                    }
                 }
 
                 // Jumps
@@ -89,7 +115,8 @@ public class EdgeWeightedDigraph
 
                     int jumpIndex = ConvertToIndex(jump.To.x, jump.To.y);
 
-                    AddDirectedEdge(new DirectedEdge(from, jumpIndex, jump.Cost));
+                    DirectedEdge edge = new DirectedEdge(from, jumpIndex, jump.Cost);
+                    AddDirectedEdge(edge);
                 }
             }
         }

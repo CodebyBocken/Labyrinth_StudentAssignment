@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -10,69 +11,21 @@ public static class PathfindingAlgorithm
     {
         // Most of your solution should be implemented in this method.
 
-        Graph mapGraph = new Graph(mapData.Width * mapData.Height);
+        //Graph mapGraph = new Graph(mapData.Width * mapData.Height);
+        EdgeWeightedDigraph ewDiGraph = new EdgeWeightedDigraph(mapData.Width * mapData.Height, mapData);
+
         int goalIndex = ConvertToNodeIndex(goal, mapData.Width);
         int startIndex = ConvertToNodeIndex(start, mapData.Width);
 
-        for (int y = 0; y < mapData.Height; y++)
-        {
-            for (int x = 0; x < mapData.Width; x++)
-            {
-                Vector2Int current = new Vector2Int(x, y);
-                int currentIndex = y * mapData.Width + x;
+        WeightCostDebugging(ewDiGraph);
 
-                
-                if (y + 1 < mapData.Height) // Check if the cell above is within bounds
-                {
-                    Vector2Int up = new Vector2Int(x, y + 1);
-                    if (!IsMovementBlocked(current, up, mapData))
-                    {
-                        int upIndex = ConvertToNodeIndex(up, mapData.Width);
-                        mapGraph.AddEdge(currentIndex, upIndex);
-                        BetterDebugDraw(current, up, Color.green, 60f);
-                    }
-                }
+        //BreadthFirstSearch bfs = new BreadthFirstSearch(mapGraph, startIndex, mapData.Width);
+        DijkstrasAlgorithm dijkstra = new DijkstrasAlgorithm(ewDiGraph, startIndex, mapData.Width);
 
-                //if (y - 1 >= 0) // Check if the cell below is within bounds
-                //{
-                //    Vector2Int down = new Vector2Int(x, y - 1);
-                //    if (!IsMovementBlocked(current, down, mapData))
-                //    {
-                //        int downIndex = ConvertToNodeIndex(down, mapData.Width);
-                //        mapGraph.AddEdge(currentIndex, downIndex);
-                //        BetterDebugDraw(current, down, Color.green, 60f);
-                //    }
-                //}
+        //List<Vector2Int> path = bfs.GetPath(goalIndex);
+        List<Vector2Int> path = dijkstra.GetPath(goalIndex);
 
-                if (x + 1 < mapData.Width) // Check if the cell to the right is within bounds
-                {
-                    Vector2Int right = new Vector2Int(x + 1, y);
-                    if (!IsMovementBlocked(current, right, mapData))
-                    {
-                        int rightIndex = ConvertToNodeIndex(right, mapData.Width);
-                        mapGraph.AddEdge(currentIndex, rightIndex);
-                        BetterDebugDraw(current, right, Color.green, 60f);
-                    }
-                }
-
-                //if (x - 1 >= 0) // Check if the cell to the left is within bounds
-                //{
-                //    Vector2Int left = new Vector2Int(x - 1, y);
-                //    if (!IsMovementBlocked(current, left, mapData))
-                //    {
-                //        int leftIndex = ConvertToNodeIndex(left, mapData.Width);
-                //        mapGraph.AddEdge(currentIndex, leftIndex);
-                //        BetterDebugDraw(current, left, Color.green, 60f);
-                //    }
-                //}
-            }
-        }
-
-        Debug.Log($"Nodes: {mapGraph.V()}, Edges: {mapGraph.E()}");
-
-        BreadthFirstSearch bfs = new BreadthFirstSearch(mapGraph, startIndex, mapData.Width);
-
-        return bfs.PathToGoal(goalIndex);
+        return path;
 
         Debug.LogWarning("FindShortestPath is not implemented.");
         return null;
@@ -107,6 +60,30 @@ public static class PathfindingAlgorithm
         Vector3 end = new Vector3(to.x + 0.5f, 0, to.y + 0.5f);
 
         Debug.DrawLine(start, end, color, duration);
+    }
+
+    private static void WeightCostDebugging(EdgeWeightedDigraph ewDiGraph)
+    {
+        int edgeCount = 0;
+        int nonUnitWeights = 0;
+
+        for (int v = 0; v < ewDiGraph.V(); v++)
+        {
+            foreach (DirectedEdge edge in ewDiGraph.adjacent(v))
+            {
+                edgeCount++;
+
+                if (edge.Weight() != 1.0)
+                {
+                    nonUnitWeights++;
+
+                    Debug.Log(
+                        $"Weight != 1: {edge.From()} -> {edge.To()}, " +
+                        $"weight = {edge.Weight()}"
+                    );
+                }
+            }
+        }
     }
 
     public static int ConvertToNodeIndex(Vector2Int node, int width)

@@ -15,12 +15,14 @@ public class Graph
     private List<int>[] adj;
     public IEnumerable<int> adjacent(int v) { return adj[v]; }
 
-    public Graph(int V)
+    public Graph(int V, IMapData mapData)
     {
         v = V;
         adj = new List<int>[v];
         for (int i = 0; i < v; i++)
             adj[i] = new List<int>();
+
+        BuildGraph(mapData);
     }
 
     public void AddEdge(int v, int w)
@@ -30,16 +32,58 @@ public class Graph
         e++;
     }
 
-    public void AddDirectedEdge(int v, int w)
+    private void BuildGraph(IMapData mapData)
     {
-        adj[v].Add(w);
-        e++;
-    }
+        for (int y = 0; y < mapData.Height; y++)
+        {
+            for (int x = 0; x < mapData.Width; x++)
+            {
+                Vector2Int current = new Vector2Int(x, y);
+                int currentIndex = y * mapData.Width + x;
 
-    public void AddWeightEdge(int v, int w, float weight)
-    {
-        adj[v].Add(w);
-        adj[w].Add(v);
-        e++;
+
+                if (y + 1 < mapData.Height) // Check if the cell above is within bounds
+                {
+                    Vector2Int up = new Vector2Int(x, y + 1);
+                    if (!PathfindingAlgorithm.IsMovementBlocked(current, up, mapData))
+                    {
+                        int upIndex = PathfindingAlgorithm.ConvertToNodeIndex(up, mapData.Width);
+                        AddEdge(currentIndex, upIndex);
+                    }
+                }
+
+                //if (y - 1 >= 0) // Check if the cell below is within bounds
+                //{
+                //    Vector2Int down = new Vector2Int(x, y - 1);
+                //    if (!IsMovementBlocked(current, down, mapData))
+                //    {
+                //        int downIndex = ConvertToNodeIndex(down, mapData.Width);
+                //        mapGraph.AddEdge(currentIndex, downIndex);
+                //        BetterDebugDraw(current, down, Color.green, 60f);
+                //    }
+                //}
+
+                if (x + 1 < mapData.Width) // Check if the cell to the right is within bounds
+                {
+                    Vector2Int right = new Vector2Int(x + 1, y);
+                    if (!PathfindingAlgorithm.IsMovementBlocked(current, right, mapData))
+                    {
+                        int rightIndex = PathfindingAlgorithm.ConvertToNodeIndex(right, mapData.Width);
+                        AddEdge(currentIndex, rightIndex);
+                    }
+                }
+
+                //if (x - 1 >= 0) // Check if the cell to the left is within bounds
+                //{
+                //    Vector2Int left = new Vector2Int(x - 1, y);
+                //    if (!IsMovementBlocked(current, left, mapData))
+                //    {
+                //        int leftIndex = ConvertToNodeIndex(left, mapData.Width);
+                //        mapGraph.AddEdge(currentIndex, leftIndex);
+                //        BetterDebugDraw(current, left, Color.green, 60f);
+                //    }
+                //}
+            }
+        }
     }
 }

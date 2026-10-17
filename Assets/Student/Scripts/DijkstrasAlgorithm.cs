@@ -4,12 +4,17 @@ using UnityEngine;
 
 public class DijkstrasAlgorithm
 {
+    private int s;
+    private int width;
     private DirectedEdge[] edgeTo;
     private double[] distTo;
     private IndexMinPQ<double> pq;
 
-    public DijkstrasAlgorithm(EdgeWeightedDigraph G, int S)
+    public DijkstrasAlgorithm(EdgeWeightedDigraph G, int S, int width)
     {
+        s = S;
+        this.width = width;
+
         edgeTo = new DirectedEdge[G.V()];
         distTo = new double[G.V()];
         pq = new IndexMinPQ<double>(G.V());
@@ -25,6 +30,7 @@ public class DijkstrasAlgorithm
             foreach (DirectedEdge edge in G.adjacent(v))
                 Relax(edge);
         }
+
     }
 
     private void Relax(DirectedEdge e)
@@ -32,10 +38,9 @@ public class DijkstrasAlgorithm
         int v = e.From();
         int w = e.To();
 
-        double newDistance = distTo[v] + e.Weight();
-        if (distTo[w] > newDistance)
+        if (distTo[w] > distTo[v] + e.Weight())
         {
-            distTo[w] = newDistance;
+            distTo[w] = distTo[v] + e.Weight();
             edgeTo[w] = e;
 
             if (pq.Contains(w))
@@ -43,6 +48,49 @@ public class DijkstrasAlgorithm
             else
                 pq.Insert(w, distTo[w]);
         }
+    }
+
+    public List<Vector2Int> GetPath(int goal)
+    {
+        if (!HasPathTo(goal))
+            return new List<Vector2Int>();
+
+        Stack<int> path = new Stack<int>();
+        int current = goal;
+
+        while (current != s)
+        {
+            path.Push(current);
+
+            DirectedEdge edge = edgeTo[current];
+            current = edge.From();
+        }
+
+        path.Push(s);
+
+        List<Vector2Int> result = new List<Vector2Int>();
+
+        while (path.Count > 0)
+        {
+            int index = path.Pop();
+
+            result.Add(PathfindingAlgorithm.ConvertToNode(index, width));
+        }
+
+        return result;
+    }
+
+    public IEnumerable<DirectedEdge> PathTo(int goal)
+    {
+        if (!HasPathTo(goal)) return null;
+
+        Stack<DirectedEdge> path = new Stack<DirectedEdge>();
+        for(DirectedEdge edge = edgeTo[goal]; edge != null; edge = edgeTo[edge.From()])
+        {
+            path.Push(edge);
+        }
+
+        return path;
     }
 
     public double DistTo(int v)
