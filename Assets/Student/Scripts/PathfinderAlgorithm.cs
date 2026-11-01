@@ -12,15 +12,15 @@ public static class PathfindingAlgorithm
         // Most of your solution should be implemented in this method.
 
         //Graph mapGraph = new Graph(mapData.Width * mapData.Height);
-        EdgeWeightedDigraph ewDiGraph = new EdgeWeightedDigraph(mapData.Width * mapData.Height, mapData);
+        EdgeWeightedDigraph EdgeWDiGraph = new EdgeWeightedDigraph(mapData.Width * mapData.Height, mapData);
 
         int goalIndex = ConvertToNodeIndex(goal, mapData.Width);
         int startIndex = ConvertToNodeIndex(start, mapData.Width);
 
-        WeightCostDebugging(ewDiGraph);
+        //WeightCostDebugging(ewDiGraph); // Used for debugging
 
         //BreadthFirstSearch bfs = new BreadthFirstSearch(mapGraph, startIndex, mapData.Width);
-        DijkstrasAlgorithm dijkstra = new DijkstrasAlgorithm(ewDiGraph, startIndex, mapData.Width);
+        DijkstrasAlgorithm dijkstra = new DijkstrasAlgorithm(EdgeWDiGraph, startIndex, mapData.Width);
 
         //List<Vector2Int> path = bfs.GetPath(goalIndex);
         List<Vector2Int> path = dijkstra.GetPath(goalIndex);
